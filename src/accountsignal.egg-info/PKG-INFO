@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: accountsignal
+Version: 0.1.0
+Summary: EY India Account Intelligence Engine — scrape, enrich, report
+Requires-Python: >=3.11
+Requires-Dist: requests<3,>=2.32
+Requires-Dist: PyYAML<7,>=6.0
+Requires-Dist: python-dotenv<2,>=1.0
+Requires-Dist: feedparser<7,>=6.0
+Requires-Dist: beautifulsoup4<5,>=4.12
+Requires-Dist: lxml<6,>=5.0
+Requires-Dist: openpyxl<4,>=3.1

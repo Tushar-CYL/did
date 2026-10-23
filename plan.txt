@@ -1,0 +1,89 @@
+================================================================
+ACCOUNTSIGNAL — EY INDIA ACCOUNT INTELLIGENCE ENGINE
+Implementation Plan + Build Status
+================================================================
+
+GOAL
+One Python command: scrape -> store JSON -> enrich/rank with EY's LLM ->
+build a Power BI-ready Excel -> populate a professional web dashboard.
+Fresh every run. No faked data. No LinkedIn.
+HIRING = India only, last month.  ALL OTHER DATA = global, last month.
+PRIORITY: news / market-intelligence insights matter MORE than hiring.
+
+KEY DECISIONS
+- Build & test on personal laptop (D:\tushar\scrape); then copy the whole
+  folder to the office laptop and confirm it runs there. => portable, pure
+  Python, pip-installable, no admin.
+- LLM = EY internal EYQ endpoint (OpenAI-compatible), model gpt-5.2.
+  Credentials in .env (never committed).
+- Scraping = FREE & robust: public ATS JSON APIs first; Playwright only as a
+  later fallback. News = Google News RSS (free) + newsroom + SEC EDGAR.
+
+----------------------------------------------------------------
+ARCHITECTURE  (src/accountsignal/)
+----------------------------------------------------------------
+  config.py            paths + .env + companies.yaml loader
+  http.py              shared session: UA, retries, per-host rate limit
+  store/schema.py      dataclasses (Role, NewsItem, MarketIntel, CompanyRecord)
+  store/io.py          atomic JSON read/write (fresh each run)
+  scrape/hiring/
+     detect.py         ATS fingerprinting (Workday/Eightfold/Phenom/SF/...)
+     base.py           India filter + date parsing + seniority heuristics
+     workday.py        Workday CXS JSON API adapter  [WORKING]
+     dispatch.py       route careers URL -> adapter
+  scrape/news/
+     google_news_rss.py  free RSS per company per category, last-month
+     collect.py          dedupe + best-category assignment + caps
+  enrich/              [PHASE 2] eyq_client, classify_hiring, market_intel,
+                       signals, rank (internal, hidden in UI)
+  output/              [PHASE 3] excel.py (Power BI), dashboard.py
+  run.py               ONE-command orchestrator
+
+DATA MODEL  (data/normalized/companies.json = single source of truth)
+  per company: hiring_india[], market_intel{hiring,vision,partnerships,
+  financial,expansion}, signals{}, scrape_errors[] (transparency).
+  Internal news _score is stripped from the dashboard payload.
+
+----------------------------------------------------------------
+ATS REALITY (detected live across the 50)
+----------------------------------------------------------------
+  Workday (5): Nike, BP, Flex, TIAA, Carrier   -> JSON API, WORKING
+  Eightfold (6), Phenom (6): anti-bot JS/XHR   -> blank for now (Playwright later)
+  SuccessFactors (4), Avature (1)              -> best-effort later
+  custom/none (9) + no career URL (20)         -> hiring blank (allowed)
+  NEWS works for ALL 50 (the priority).
+
+----------------------------------------------------------------
+STATUS
+----------------------------------------------------------------
+PHASE 1 — GET ALL DATA  (IN PROGRESS / near complete)
+  [x] repo scaffold, venv (Python 3.13), requirements, pyproject, .env
+  [x] companies.yaml seeded with all 50 + known URLs
+  [x] http/schema/io foundation
+  [x] ATS detection + Workday hiring adapter (India + last-month filters)
+  [x] Google News RSS market-intelligence pipeline (5 fields, dedupe, caps)
+  [x] orchestrator writes data/raw/** and data/normalized/companies.json
+  [ ] full 50-company run (running now -> validates the milestone)
+
+PHASE 2 — ENRICH / RANK (EYQ)
+  [ ] eyq_client (OpenAI-compatible) + --mock-llm offline mode
+  [ ] clean 5-field market summaries (no duplication, straight sentences)
+  [ ] strategic signals + short "so what for EY" takeaways
+  [ ] INTERNAL news relevance ranking (filters noise; never shown in UI)
+  [ ] classify hiring: department, skills, seniority, experience, type, critical
+
+PHASE 3 — OUTPUTS
+  [ ] Power BI-ready Excel (flat sheets: Companies, Hiring_India, News, Signals)
+  [ ] professional static dashboard (news-first); integrate user's UI when shared
+
+PHASE 4 — PORTABILITY
+  [ ] README with office-laptop transfer + setup + run steps
+
+----------------------------------------------------------------
+RUN
+----------------------------------------------------------------
+  python -m accountsignal.run                      full pipeline
+  python -m accountsignal.run --only news          single stage
+  python -m accountsignal.run --companies "TIAA"   subset
+  python -m accountsignal.run --mock-llm           build without EYQ
+================================================================

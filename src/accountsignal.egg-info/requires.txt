@@ -1,0 +1,7 @@
+requests<3,>=2.32
+PyYAML<7,>=6.0
+python-dotenv<2,>=1.0
+feedparser<7,>=6.0
+beautifulsoup4<5,>=4.12
+lxml<6,>=5.0
+openpyxl<4,>=3.1

@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "accountsignal"
+version = "0.1.0"
+description = "EY India Account Intelligence Engine — scrape, enrich, report"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.32,<3",
+    "PyYAML>=6.0,<7",
+    "python-dotenv>=1.0,<2",
+    "feedparser>=6.0,<7",
+    "beautifulsoup4>=4.12,<5",
+    "lxml>=5.0,<6",
+    "openpyxl>=3.1,<4",
+    "playwright>=1.47",
+    "apify-client>=1.7",
+    "pip-system-certs>=4.0",   # trust the OS (corporate) cert store -> fixes SSL on inspected networks
+]
+
+[project.scripts]
+accountsignal = "accountsignal.run:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: #0f0f17;
+  color: #e9e9ee;
+  font-family: "Segoe UI", Arial, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  /* dark premium card */
+  .card {
+    background: #1a1a24;
+    border: 1px solid #2b2b38;
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.3), 0 18px 40px -24px rgba(0,0,0,.7);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 22px 48px -22px rgba(0,0,0,.8); border-color: #3a3a4a; }
+  .chip { @apply inline-block text-[11px] font-semibold px-2.5 py-[3px] rounded-full; }
+  .sub { @apply text-[10.5px] uppercase tracking-wide font-bold; color: #b0b0be; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.animate-in { animation: fadeInUp .55s cubic-bezier(.22,.61,.36,1) both; }
+
+/* readability lift on dark theme: the dimmest muted text was hard to read */
+.text-gray-500 { color: #9699a7 !important; }
+
+a, button, select, summary { transition: color .15s ease, background-color .15s ease; }
+details > summary { outline: none; }
+/* dark form controls */
+select, input { background: #1a1a24 !important; border-color: #2b2b38 !important; color: #e9e9ee !important; }
+select option { background: #1a1a24; color: #e9e9ee; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-in { animation: none; }
+  .card:hover { transform: none; }
+}

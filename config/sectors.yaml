@@ -1,0 +1,53 @@
+# Industry sector per company (auto-classified; edit any you disagree with).
+# Used as the primary grouping lens in the dashboard.
+sectors:
+  Tesco: Retail
+  Takeda: Pharma
+  Diageo: FMCG / CPG
+  Airbnb: Technology
+  Nike: Retail
+  Kimberly-Clark: FMCG / CPG
+  BCG (Boston Consulting Group): Consulting
+  Alstom: Industrial
+  BP: Oil & Gas
+  DTICI (Daimler Truck): Automotive
+  AB InBev: FMCG / CPG
+  Cargill: FMCG / CPG
+  Colgate-Palmolive: FMCG / CPG
+  Colt Technology: Technology
+  AstraZeneca: Pharma
+  Merck: Pharma
+  Flex: Technology
+  Applied Materials: Technology
+  Novo Nordisk: Pharma
+  7-Eleven: Retail
+  Adobe: Technology
+  Caterpillar: Industrial
+  Henny Penny: Industrial
+  Chevron: Oil & Gas
+  Kellogg's (Kellanova): FMCG / CPG
+  Kohler: Industrial
+  Levi's: Retail
+  Thermo Fisher: Pharma
+  Magnum ICC: FMCG / CPG
+  Magnum International: FMCG / CPG
+  Estee Lauder: FMCG / CPG
+  HCLTech: Technology
+  Microsoft: Technology
+  Baker Hughes: Oil & Gas
+  North Star: Industrial
+  DaVita: Healthcare
+  PepsiCo: FMCG / CPG
+  Procter & Gamble: FMCG / CPG
+  Godrej: FMCG / CPG
+  Qualcomm: Technology
+  Rio Tinto: Mining & Metals
+  SLB (Schlumberger): Oil & Gas
+  GSK: Pharma
+  Lowe's: Retail
+  MBRDI (Mercedes-Benz R&D): Automotive
+  TIAA: Financial Services
+  Unilever: FMCG / CPG
+  ZS Associates: Consulting
+  Philip Morris International: FMCG / CPG
+  Carrier: Industrial

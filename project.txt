@@ -1,0 +1,198 @@
+================================================================
+ACCOUNTSIGNAL — EY INDIA ACCOUNT INTELLIGENCE ENGINE
+Requirements / Scope (what was asked for)
+================================================================
+
+
+----------------------------------------------------------------
+PART 1 — THE 50 TARGET ACCOUNTS (COMPANY NAMES)
+----------------------------------------------------------------
+1.  Tesco
+2.  Takeda
+3.  Diageo
+4.  Airbnb
+5.  Nike
+6.  Kimberly-Clark
+7.  BCG (Boston Consulting Group)
+8.  Alstom
+9.  BP
+10. DTICI (Daimler Truck)
+11. AB InBev
+12. Cargill
+13. Colgate-Palmolive
+14. Colt Technology
+15. AstraZeneca
+16. Merck
+17. Flex
+18. Applied Materials
+19. Novo Nordisk
+20. 7-Eleven
+21. Adobe
+22. Caterpillar
+23. Henny Penny
+24. Chevron
+25. Kellogg's (Kellanova)
+26. Kohler
+27. Levi's
+28. Thermo Fisher
+29. Magnum ICC
+30. Magnum International
+31. Estee Lauder
+32. HCLTech
+33. Microsoft
+34. Baker Hughes
+35. North Star
+36. DaVita
+37. PepsiCo
+38. Procter & Gamble
+39. Godrej
+40. Qualcomm
+41. Rio Tinto
+42. SLB (Schlumberger)
+43. GSK
+44. Lowe's
+45. MBRDI (Mercedes-Benz R&D)
+46. TIAA
+47. Unilever
+48. ZS Associates
+49. Philip Morris International
+50. Carrier
+
+
+----------------------------------------------------------------
+PART 2 — COMPANY WEBSITE + CAREER (CAREER) URL PROVIDED
+Format:  Company | Website | Career URL
+(blank = not provided yet / to be added)
+----------------------------------------------------------------
+Tesco                 | https://tesco.com            | https://www.tesco-careers.com
+Takeda                | https://takeda.com           | https://jobs.takeda.com
+Diageo                | https://diageo.com           | https://careers.diageo.com
+Airbnb                | https://airbnb.com           | https://careers.airbnb.com/
+Nike                  | https://nike.com             | https://careers.nike.com/jobs?location_name=India&location_type=4
+Kimberly-Clark        |                              |
+BCG                   | https://bcg.com              | https://careers.bcg.com
+Alstom                | https://alstom.com           | https://jobsearch.alstom.com
+BP                    | https://bp.com               | https://careers.bp.com
+DTICI (Daimler Truck) |                              |
+AB InBev              | https://ab-inbev.com         | https://www.ab-inbev.com/careers/
+Cargill               | https://cargill.com          | https://careers.cargill.com
+Colgate-Palmolive     | https://colgatepalmolive.com | https://jobs.colgate.com
+Colt Technology       | https://colt.net             | https://www.colt.net/careers/
+AstraZeneca           | https://astrazeneca.com      | https://careers.astrazeneca.com
+Merck                 |                              |
+Flex                  | https://flex.com             | https://flex.com/careers
+Applied Materials     | https://appliedmaterials.com | https://careers.appliedmaterials.com
+Novo Nordisk          | https://novonordisk.com      | https://careers.novonordisk.com
+7-Eleven              | https://7-eleven.com         | https://careers.7-eleven.com
+Adobe                 | https://adobe.com            | https://careers.adobe.com
+Caterpillar           |                              |
+Henny Penny           |                              |
+Chevron               | https://chevron.com          | https://careers.chevron.com
+Kellogg's (Kellanova) |                              | https://careers.kellanova.com
+Kohler                |                              |
+Levi's                |                              |
+Thermo Fisher         | https://thermofisher.com     | https://jobs.thermofisher.com
+Magnum ICC            |                              |
+Magnum International  |                              |
+Estee Lauder          | https://elcompanies.com      | https://careers.elcompanies.com
+HCLTech               |                              |
+Microsoft             | https://microsoft.com        | https://careers.microsoft.com
+Baker Hughes          |                              |
+North Star            |                              |
+DaVita                | https://davita.com           | https://careers.davita.com
+PepsiCo               |                              |
+Procter & Gamble      | https://pg.com               | https://www.pgcareers.com
+Godrej                |                              | https://www.godrejcareers.com/
+Qualcomm              | https://qualcomm.com         | https://careers.qualcomm.com
+Rio Tinto             |                              |
+SLB (Schlumberger)    |                              |
+GSK                   | https://gsk.com              | https://jobs.gsk.com
+Lowe's                | https://lowes.com            | https://talent.lowes.com
+MBRDI (Mercedes-Benz) |                              |
+TIAA                  | https://tiaa.org             | https://careers.tiaa.org
+Unilever              | https://unilever.com         | https://careers.unilever.com
+ZS Associates         |                              |
+Philip Morris Intl    |                              |
+Carrier               | https://carrier.com          | https://jobs.carrier.com
+
+
+----------------------------------------------------------------
+PART 3 — WHAT TO SCRAPE (DETAILS OF EACH FIELD)
+----------------------------------------------------------------
+
+RULE:
+- HIRING data   = INDIA ONLY, open roles, posted in the last month.
+- ALL OTHER data = GLOBAL, last month.
+- Nothing is faked. If a site has no scrapable hiring, hiring is left blank;
+  its global signals still show.
+
+A) INDIA HIRING — one row per open role (India only):
+   - Company
+   - Role / job title
+   - Location (city) + country
+   - Department / business domain (Finance, Supply Chain, Clinical/R&D,
+     Risk & Compliance, Manufacturing, Commercial & Marketing, HR & People,
+     Technology / IT)
+   - Skills / technologies detected (SAP, Azure, AWS, Power BI, Python,
+     GenAI, etc.)
+   - Seniority level (Executive / Manager-Lead / Senior / Mid / Junior)
+   - Experience (years) where stated
+   - Employment type (Permanent / Full-time vs Contract / Temporary / Intern)
+   - Posted date + aging (days open)
+   - Critical-role flag (hard-to-fill / high-priority)
+   - Job ID + source URL (link back to the live posting)
+   - Hiring manager (ONLY if named in the posting; never guessed)
+
+B) MARKET INTELLIGENCE — GLOBAL, last month, 5 fields per company:
+   (sources: news + official company newsrooms / investor relations +
+    SEC / RNS filings)
+   1. Hiring            — workforce / recruitment / headcount news
+   2. Vision & strategy — leadership, reorganisation, strategic direction
+   3. Partnerships      — alliances, technology / cloud / AI vendor deals
+   4. Financial         — results, earnings, revenue, funding, acquisitions
+   5. Expansion         — new facilities, investments, India / GCC capability
+
+C) STRATEGIC SIGNALS (derived, per company):
+   - Partnership signals
+   - Vision / strategy shifts
+   - Tool-gravitation (which vendors/tech they lean on -> the EY angle)
+   - Short LLM takeaways / "so what for EY"
+
+D) NEWS RANKING (INTERNAL ONLY):
+   - News items are RANKED by correlation / relevance to the company.
+   - This ranking is used internally to order/pick items.
+   - DO NOT show the rank/score in the UI.
+
+E) NOT ALLOWED:
+   - Do NOT scrape LinkedIn (no LinkedIn PII).
+
+
+----------------------------------------------------------------
+PART 4 — WHAT THE MANAGER NEEDS (DELIVERABLES / EXPECTATIONS)
+----------------------------------------------------------------
+1. Per-company India account intelligence across all ~50 target accounts,
+   combining India hiring + global market insights.
+
+2. TWO deliverables, regenerated together:
+   a) DASHBOARD — a static web dashboard (open in a browser, no login).
+   b) BI EXCEL  — a Power BI-ready Excel workbook.
+
+3. ONE command runs the whole pipeline:
+   scrape -> process -> rank -> build Excel -> update the UI.
+
+4. Get data for ALL 50 companies by any available means.
+   Blank is acceptable ONLY when a site is genuinely unscrapable.
+   Never fake data.
+
+5. FRESH every run — each run re-scrapes / recomputes; do not keep showing
+   old data. The dashboard AND Excel must reflect the latest run.
+
+6. Insights must be clean, clear and understandable for EVERY client:
+   - No duplication (same event repeated across fields/cards).
+   - Proper, straight, readable sentences.
+
+7. UI is fixed — only ADD values into the existing UI; do not change the
+   UI layout/design.
+
+8. Hiring = India only; everything else = global, last month (the core rule).
+================================================================
