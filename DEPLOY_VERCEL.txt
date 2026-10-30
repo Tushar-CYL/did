@@ -56,8 +56,13 @@ see  vercel.json  and the  webapp  folder in the file list.
         Framework Preset      : Other   (auto-detected)
         Root Directory        : EMPTY / default  *** IMPORTANT ***
         Build and Output Settings : leave empty (vercel.json rules)
-        Environment Variables : none
+        Environment Variables : none  *** also leave EMPTY ***
  5. Click "Deploy" and wait about 2 minutes.
+
+Never add a variable such as NODE_ENV=production in the Vercel
+dashboard: npm would then skip the dev-only build tools
+(TypeScript, Tailwind) and the build fails. The site needs no
+environment variables at all.
 
 !!! Do NOT set Root Directory to "webapp". !!!
 The committed vercel.json already builds inside webapp\ and
@@ -116,11 +121,12 @@ only after data.json is committed and pushed.
     changed. Commit vercel.json and keep Root Directory empty.
 
 Build fails with a TypeScript, module or "next build" error
-    Run the same build locally first:
-        cd webapp
-        npm install
-        npm run build
-    Fix what it prints, push again. Vercel runs that same command.
+    Run the same build locally first, from this folder:
+        npm --prefix webapp ci --no-audit --no-fund
+        npm --prefix webapp run build
+    Fix what it prints, push again - Vercel runs those exact two
+    commands (see the "installCommand"/"buildCommand" in
+    vercel.json).
 
 Site builds but shows "Could not load data.json"
     webapp\public\data.json is missing from the repo. Commit it.
@@ -138,10 +144,15 @@ Site works but shows old numbers
 
 "Cannot find module './NNN.js'" or echarts errors
     Someone ran "npm audit fix --force" and broke the pinned
-    versions. Restore them:
+    versions. Restore them - in a Command Prompt:
         cd webapp
         git checkout package.json package-lock.json
-        rmdir /s /q node_modules .next .next-dev
+        rd /s /q node_modules .next .next-dev
+        npm install
+    In PowerShell the same delete is:
+        cd webapp
+        git checkout package.json package-lock.json
+        Remove-Item -Recurse -Force node_modules,.next,.next-dev
         npm install
     (DEPLOY_AZURE.txt section A3 explains why.)
 
@@ -161,17 +172,28 @@ Roll back to an earlier version
 
     Deployment Protection (Settings -> Deployment Protection) can
     put a Vercel login in front of the site if it must stay
-    internal. Note that without it the URL is public to anyone who
-    has it - the data.json is not secret, but do not put
-    confidential client data on a public link.
+    internal. Without it the URL is public to anyone who has it.
+
+    VISIBILITY CHECK: the GitHub repo Tushar-CYL/did is currently
+    PUBLIC, which means the code, the .txt notes and
+    webapp/public/data.json can be read by anyone on github.com,
+    and the *.vercel.app link is open too. If this is internal EY
+    material, do both of these:
+       1. GitHub repo -> Settings -> scroll to "Danger Zone" ->
+          "Change repository visibility" -> Private. Vercel can
+          still deploy a private repo you own (free plan included).
+       2. Vercel -> Project -> Settings -> Deployment Protection ->
+          Vercel Authentication (or Password Protection on a paid
+          plan if an outside person must open it).
+    Note that making the repo private does not remove copies that
+    were already downloaded/forked while it was public.
 
 
 ---------------------------------------------------------------
  7. QUICK REFERENCE
 ---------------------------------------------------------------
-Local preview of the EXACT deployed files:
-      cd webapp
-      npm run build
+Local preview of the EXACT deployed files (run from this folder):
+      npm --prefix webapp run build
       python webapp\serve_nocache.py 3100    -> http://localhost:3100
 
 Local dev with live reload:
