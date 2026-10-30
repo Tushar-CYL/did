@@ -2,6 +2,22 @@
  ACCOUNTSIGNAL - DEPLOY TO VERCEL (GitHub -> auto deploy)
 ===============================================================
 
+STATUS: ALREADY SET UP  (last checked 2026-10-30)
+
+    Live site    : https://ey-account-intelligence.vercel.app
+    GitHub repo  : https://github.com/Tushar-CYL/did   (branch main)
+    Vercel team  : "tushar's projects" (tushars-projects-6536b65c)
+    Vercel project: ey-account-intelligence
+
+The GitHub repository is connected to that Vercel project, so
+every  git push origin main  rebuilds and replaces the live site
+automatically in about 2 minutes. Nothing has to be clicked.
+
+The rest of this file explains what is deployed, the monthly
+data-refresh routine, and how to fix things (including how to
+set the project up again from scratch if it is ever deleted).
+
+
 WHAT GETS DEPLOYED
 ------------------
 The website is the Next.js app in  webapp\ . Vercel builds it on
@@ -9,7 +25,7 @@ its own server and hosts the finished static site (plain
 HTML/CSS/JS + data.json). No Python, no server, no database runs
 on Vercel.
 
-Everything Vercel needs is already committed in the repo:
+Everything Vercel needs is committed in the repo:
 
     vercel.json                 build recipe (build + output folder)
     webapp/package.json         the app + its exact pinned versions
@@ -22,12 +38,13 @@ running on the laptop and writes webapp\public\data.json.
 
 
 ---------------------------------------------------------------
- 1. ONE-TIME: PUT THE CODE ON GITHUB
+ 1. GITHUB - DONE
 ---------------------------------------------------------------
-From this folder (cmd, PowerShell or Git Bash):
+The code is on GitHub (public repo, branch main). To push changes
+from this folder later:
 
     git add -A
-    git commit -m "Vercel deploy setup"
+    git commit -m "what changed"
     git push origin main
 
 If GitHub asks for a password, paste a Personal Access Token
@@ -39,44 +56,49 @@ work and are easier.
 Your .env file is in .gitignore and is NOT uploaded, so the EYQ /
 Apify keys stay on the laptop.
 
-Check: open  https://github.com/Tushar-CYL/did  and confirm you can
-see  vercel.json  and the  webapp  folder in the file list.
-
 
 ---------------------------------------------------------------
- 2. ONE-TIME: CONNECT IT TO VERCEL
+ 2. VERCEL - DONE (project linked to the repo)
 ---------------------------------------------------------------
- 1. Open   https://vercel.com/new
- 2. Sign in with GitHub (the account that owns the repo).
- 3. "Import Git Repository" -> choose  Tushar-CYL/did .
-    Not listed? Click "Adjust GitHub App Permissions" and give
-    Vercel access to that repository.
- 4. On the configure screen leave everything as it is:
-        Project Name          : anything, e.g. ey-account-intel
-        Framework Preset      : Other   (auto-detected)
-        Root Directory        : EMPTY / default  *** IMPORTANT ***
-        Build and Output Settings : leave empty (vercel.json rules)
-        Environment Variables : none  *** also leave EMPTY ***
- 5. Click "Deploy" and wait about 2 minutes.
+The project  ey-account-intelligence  in the team "tushar's
+projects" is connected to GitHub repo  Tushar-CYL/did , branch
+main, with these settings (all of them matter):
+
+    Framework Preset      : Other          (NOT "Python"/"Next.js")
+    Root Directory        : EMPTY / default
+    Build Command         : npm --prefix webapp run build
+    Install Command       : npm --prefix webapp ci --no-audit --no-fund
+    Output Directory      : webapp/out
+    Environment Variables : none
+
+Only the first two lines are unusual, and they are required
+because this repo is a Python project with a Next.js site inside
+webapp\: Vercel would otherwise detect "Python" from
+requirements.txt, try to run app.py as a serverless function and
+fail with PYTHON_ENTRYPOINT_NOT_FOUND. The same commands are ALSO
+written in  vercel.json  at the repo root, so a re-import from
+GitHub picks them up automatically.
 
 Never add a variable such as NODE_ENV=production in the Vercel
 dashboard: npm would then skip the dev-only build tools
 (TypeScript, Tailwind) and the build fails. The site needs no
 environment variables at all.
 
-!!! Do NOT set Root Directory to "webapp". !!!
-The committed vercel.json already builds inside webapp\ and
-publishes webapp\out; changing the root as well makes the paths
-point in the wrong place and the build fails.
+Never set Root Directory to "webapp". The committed vercel.json
+already builds inside webapp\ and publishes webapp\out; changing
+the root as well makes the paths point in the wrong place.
 
-You end up with a public link such as
-    https://ey-account-intel.vercel.app
-It is shown on the project page as the "Production" deployment.
-Share that link.
+To re-create the project from scratch (only if it was deleted):
+ 1. Open https://vercel.com/new and sign in with GitHub.
+ 2. Import  Tushar-CYL/did .
+ 3. Set Framework Preset to  Other  (click it - do not accept a
+    detected framework) and leave Root Directory empty.
+ 4. Leave Build/Output/Environment empty and click Deploy.
+ 5. Wait ~2 minutes for the first production deployment.
 
 
 ---------------------------------------------------------------
- 3. FROM THEN ON: EVERY PUSH DEPLOYS ITSELF
+ 3. FROM NOW ON: EVERY PUSH DEPLOYS ITSELF
 ---------------------------------------------------------------
 Push a commit to the main branch and Vercel rebuilds + swaps the
 live site in about 2 minutes. No button to press.
@@ -116,6 +138,13 @@ only after data.json is committed and pushed.
 ---------------------------------------------------------------
  5. IF SOMETHING GOES WRONG
 ---------------------------------------------------------------
+"PYTHON_ENTRYPOINT_NOT_FOUND" / "Found app.py but it does not
+export a top-level app, application or handler"
+    The project is using the Python framework preset. Vercel ->
+    Project -> Settings -> Build & Development Settings ->
+    Framework Preset -> change to  Other  and save, then
+    Deployments -> Redeploy.
+
 "No framework was detected" / build fails immediately
     vercel.json is not at the repo root, or Root Directory was
     changed. Commit vercel.json and keep Root Directory empty.
@@ -137,6 +166,11 @@ Site works but shows old numbers
         git add webapp/public/data.json
         git commit -m "data refresh"
         git push origin main
+
+Pushed but Vercel did not rebuild
+    Check Vercel -> Deployments. If nothing is there, the GitHub
+    connection was lost: Project -> Settings -> Git -> reconnect
+    Tushar-CYL/did (branch main), then push again.
 
 /deep-dive opens a 404
     Keep trailingSlash: true in webapp\next.config.js (it is set)

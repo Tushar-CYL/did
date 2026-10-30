@@ -61,15 +61,15 @@ Market-intelligence news comes from **Google News RSS** (free) for all 50.
 - `ACCOUNTSIGNAL_LOOKBACK_DAYS` (default 30), `APIFY_MAX_ITEMS`, `APIFY_MAX_USD`
 
 ## Deploy the dashboard to Vercel (auto-deploys on every push)
-The website is the static Next.js app in `webapp/`. The committed
-[`vercel.json`](vercel.json) tells Vercel to build it (`npm --prefix webapp run
-build`) and publish `webapp/out`, so the Vercel project needs **no** settings.
+**Live site: <https://ey-account-intelligence.vercel.app>** — the Vercel project
+`ey-account-intelligence` is already connected to this GitHub repo (branch
+`main`) and builds from [`vercel.json`](vercel.json): install
+`npm --prefix webapp ci`, build `npm --prefix webapp run build`, publish
+`webapp/out`. Every push to `main` rebuilds the site in ~2 minutes.
 
-One-time setup:
-1. Push this repo to GitHub.
-2. Open <https://vercel.com/new>, import the repo, keep **Root Directory empty**
-   and Framework Preset **Other**, then click **Deploy**.
-3. Every later push to `main` rebuilds and republishes the site automatically.
+If the project ever has to be re-created: import the repo at
+<https://vercel.com/new>, set Framework Preset to **Other** (not the detected
+Python framework), keep **Root Directory empty**, and Deploy.
 
 Refreshing the numbers is therefore just data → git → auto-deploy:
 ```bash
