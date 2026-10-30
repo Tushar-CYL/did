@@ -13,6 +13,10 @@ The GitHub repository is connected to that Vercel project, so
 every  git push origin main  rebuilds and replaces the live site
 automatically in about 2 minutes. Nothing has to be clicked.
 
+Checks that were run on 2026-10-30: a normal push to main started a
+production build automatically, and the live site answered 200 on
+ / , /deep-dive/ , /data.json , /ey-logo.png and the JS chunks.
+
 The rest of this file explains what is deployed, the monthly
 data-refresh routine, and how to fix things (including how to
 set the project up again from scratch if it is ever deleted).

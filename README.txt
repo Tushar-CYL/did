@@ -72,11 +72,14 @@ VIEW THE FULL WEB APP
 
 DEPLOYING THE WEBSITE (Vercel)
 ------------------------------
-See DEPLOY_VERCEL.txt for the full walkthrough. Short version: push
-the code to GitHub, import the repo at https://vercel.com/new with
-the Root Directory left empty, press Deploy. After that every push
-to main redeploys the live site automatically, and PUBLISH_SITE.bat
-does the "refresh data + push" step for you.
+The site is live at:
+      https://ey-account-intelligence.vercel.app
+
+It is already connected to this GitHub repo (branch main), so every
+"git push origin main" rebuilds and republishes it automatically in
+about 2 minutes. PUBLISH_SITE.bat does the "refresh data + push"
+step for you; open DEPLOY_VERCEL.txt for the full walkthrough,
+the project settings and troubleshooting.
 
 
 NOTES
