@@ -59,3 +59,24 @@ Market-intelligence news comes from **Google News RSS** (free) for all 50.
 ## Tuning (`config/companies.yaml` and `.env`)
 - Add/fix a company's `career_url` or `news_query`
 - `ACCOUNTSIGNAL_LOOKBACK_DAYS` (default 30), `APIFY_MAX_ITEMS`, `APIFY_MAX_USD`
+
+## Deploy the dashboard to Vercel (auto-deploys on every push)
+The website is the static Next.js app in `webapp/`. The committed
+[`vercel.json`](vercel.json) tells Vercel to build it (`npm --prefix webapp run
+build`) and publish `webapp/out`, so the Vercel project needs **no** settings.
+
+One-time setup:
+1. Push this repo to GitHub.
+2. Open <https://vercel.com/new>, import the repo, keep **Root Directory empty**
+   and Framework Preset **Other**, then click **Deploy**.
+3. Every later push to `main` rebuilds and republishes the site automatically.
+
+Refreshing the numbers is therefore just data → git → auto-deploy:
+```bash
+python app.py                       # refresh the scrape, rewrites webapp/public/data.json
+git add webapp/public/data.json
+git commit -m "data refresh"
+git push origin main                # Vercel redeploys in ~2 min
+```
+Double-click **`PUBLISH_SITE.bat`** to do that for you. Step-by-step
+instructions and troubleshooting live in [`DEPLOY_VERCEL.txt`](DEPLOY_VERCEL.txt).

@@ -70,6 +70,15 @@ VIEW THE FULL WEB APP
       http://localhost:3000
 
 
+DEPLOYING THE WEBSITE (Vercel)
+------------------------------
+See DEPLOY_VERCEL.txt for the full walkthrough. Short version: push
+the code to GitHub, import the repo at https://vercel.com/new with
+the Root Directory left empty, press Deploy. After that every push
+to main redeploys the live site automatically, and PUBLISH_SITE.bat
+does the "refresh data + push" step for you.
+
+
 NOTES
 -----
 - Every run is fresh - it re-scrapes and rebuilds all reports.

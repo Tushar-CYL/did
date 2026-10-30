@@ -14,6 +14,7 @@ class Role:
     """One open India role (hiring = India only, posted last month)."""
     role: str = ""
     city: str = ""
+    region: str = ""               # North / West / South / East / Other
     country: str = "India"
     department: str = ""            # Finance, Supply Chain, Clinical/R&D, ...
     team: str = ""                  # org/sub-team where the posting states it

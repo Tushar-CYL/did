@@ -13,16 +13,9 @@ export default function Nav() {
   return (
     <header className="sticky top-0 z-20 bg-ey-black text-white">
       <div className="max-w-[1320px] mx-auto px-6 h-14 flex items-center gap-5">
-        <div className="flex items-center gap-2.5">
-          <span aria-hidden className="flex items-end gap-[3px] h-8 w-8 justify-center">
-            <span className="w-1.5 bg-ey-yellow rounded-sm" style={{ height: "40%" }} />
-            <span className="w-1.5 bg-ey-yellow rounded-sm" style={{ height: "68%" }} />
-            <span className="w-1.5 bg-ey-yellow rounded-sm" style={{ height: "100%" }} />
-          </span>
-          <div className="leading-tight">
-            <div className="font-extrabold text-[13.5px]">India Account Intelligence</div>
-            <div className="text-[10.5px] text-gray-300">Technology consulting sales engine</div>
-          </div>
+        <div className="flex items-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/ey-logo.png" alt="EY" className="h-9 w-9 rounded" />
         </div>
         <nav className="ml-6 flex gap-1">
           {LINKS.map((l) => {

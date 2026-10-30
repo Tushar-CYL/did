@@ -196,3 +196,12 @@ PART 4 — WHAT THE MANAGER NEEDS (DELIVERABLES / EXPECTATIONS)
 
 8. Hiring = India only; everything else = global, last month (the core rule).
 ================================================================
+
+
+
+
+
+my manager give me one project scrape every data and store in json and from that intrigate llm and make reports ui and excel so ui e can see dashboard and for excel i can upload at bi to make report so restriction is in my office laptop have many restriction so scrape diffult for all company  data and that data should be past month data like a automation that i run one python code and it scrape first process and llm and ranking and present in ui and generate csv file and make best ay to get all data i give you list of company and i have one ui
+  so focus on first get all data scrape all detailed data
+
+  so companies are

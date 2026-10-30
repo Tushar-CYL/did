@@ -62,7 +62,7 @@ def scrape_company(company: config.Company, http: Http, settings: config.Setting
             rec.scrape_errors.append(f"hiring: ERROR {exc}")
     if do_news:
         try:
-            news = news_collect.collect(company.news_query, http, settings.lookback_days)
+            news = news_collect.collect(company.news_query, http, settings.news_lookback_days)
             rec.market_intel = _market_intel_from_news(news)
             total = sum(len(v) for v in news.values())
             rec.scrape_errors.append(f"news: {total} items")
@@ -106,12 +106,23 @@ def main(argv: list[str] | None = None) -> int:
     records: list[CompanyRecord] = []
 
     if do_hiring or do_news:
-        log.info("Scraping %d companies (hiring=%s, news=%s, lookback=%dd)",
-                 len(companies), do_hiring, do_news, settings.lookback_days)
+        log.info("Scraping %d companies (hiring=%s @%dd, news=%s @%dd)",
+                 len(companies), do_hiring, settings.lookback_days,
+                 do_news, settings.news_lookback_days)
+        # On a full hiring run, space out companies so career portals don't
+        # rate-limit/block our IP (back-to-back hits trip bot defenses). Skipped
+        # for single-company / news-only runs. Tunable via ACCOUNTSIGNAL_SCRAPE_DELAY.
+        import os as _os
+        import random as _random
+        import time as _time
+        _delay = float(_os.environ.get("ACCOUNTSIGNAL_SCRAPE_DELAY", "4"))
+        _space = do_hiring and len(companies) > 3 and _delay > 0
         for i, company in enumerate(companies, 1):
             log.info("[%d/%d] %s", i, len(companies), company.name)
             rec = scrape_company(company, http, settings, do_hiring, do_news)
             records.append(rec)
+            if _space and i < len(companies):
+                _time.sleep(_delay + _random.uniform(0, _delay))  # jittered pause
 
         # write the normalized single-source-of-truth.
         # For a partial run (--only / --companies) merge into the existing file so

@@ -11,6 +11,10 @@ __pycache__/
 *.pyc
 .pytest_cache/
 
+# Vercel / deploy artifacts
+.vercel/
+*.zip
+
 # OS / editor
 .DS_Store
 Thumbs.db

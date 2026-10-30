@@ -24,8 +24,9 @@ _FIELD_KEY = {"hiring": "hiring", "vision": "vision_strategy", "partnerships": "
 _FIELD_LABELS = {"hiring": "Hiring", "vision_strategy": "Vision & strategy",
                  "partnerships": "Partnerships", "money_metrics": "Financial performance",
                  "expansion": "Expansion"}
-_NEWS_LABEL = {"hiring": "Hiring", "vision": "Vision & strategy", "partnerships": "Partnerships",
-               "financial": "Financial", "expansion": "Expansion"}
+_NEWS_LABEL = {"expansion": "GCC & tech centres", "vision": "Transformation & projects",
+               "partnerships": "Tech partnerships & alliances", "financial": "Cost & investment",
+               "hiring": "Jobs: adds & cuts"}
 _REGIONS = {"BLR": "Bengaluru", "NCR": "Delhi NCR", "West": "Mumbai / Pune",
             "Hyd": "Hyderabad", "South": "Chennai / South", "": "Other India"}
 _SENIORITY = {"Manager-Lead": "Manager/Lead"}
@@ -52,6 +53,24 @@ _CITY_ALIAS = {
     "noida": "Noida", "pune": "Pune", "hyderabad": "Hyderabad",
     "gurgaon/gurugram": "Gurugram",
 }
+
+
+# macro-region buckets for the leadership view (North / West / South / East)
+_MACRO_REGION = {
+    "North": ("delhi", "gurugram", "gurgaon", "noida", "chandigarh", "jaipur", "ncr", "faridabad", "ghaziabad"),
+    "West": ("mumbai", "pune", "ahmedabad", "gandhinagar", "nagpur", "surat", "goa"),
+    "South": ("bengaluru", "bangalore", "hyderabad", "chennai", "coimbatore", "kochi", "cochin",
+              "mysuru", "mysore", "gandipet", "bikkanahalli", "hosahalli", "kakinada", "vijayawada", "trivandrum"),
+    "East": ("kolkata", "bhubaneswar", "patna", "guwahati", "ranchi"),
+}
+
+
+def _macro_region(city: str) -> str:
+    c = (city or "").lower()
+    for region, keys in _MACRO_REGION.items():
+        if any(k in c for k in keys):
+            return region
+    return "Other"
 
 
 def _norm_city(city: str) -> str:
@@ -92,16 +111,19 @@ def _build_company(rec: dict, sector_map: dict[str, str]) -> tuple[dict, list[di
     mi = rec["market_intel"]
 
     roles: list[dict] = []
-    dept_c, tool_c, prac_c, sen_c, loc_c = Counter(), Counter(), Counter(), Counter(), Counter()
+    dept_c, tool_c, prac_c, sen_c, loc_c, reg_c = (
+        Counter(), Counter(), Counter(), Counter(), Counter(), Counter())
     for r in rec.get("hiring_india", []):
         dept = r.get("department", "") or "Other"
         sen = _SENIORITY.get(r.get("seniority", ""), r.get("seniority", "")) or "Mid"
         city = _norm_city(r.get("city", "") or "")
+        region = r.get("region") or _macro_region(city)   # prefer the enriched value
         tools = r.get("tools", []) or []
         practices = r.get("practices", []) or []
         roles.append({
             "role_title": r.get("role", ""), "department": dept, "team": r.get("team", ""),
             "seniority": sen, "tools": tools, "practices": practices, "city": city,
+            "region": region,
             "location": (city + ", India") if city else "India",
             "posted_date": r.get("posted_date", ""), "aging_days": r.get("days_open"),
             "source_url": r.get("source_url", ""),
@@ -110,6 +132,7 @@ def _build_company(rec: dict, sector_map: dict[str, str]) -> tuple[dict, list[di
         sen_c[sen] += 1
         if city:
             loc_c[city] += 1
+        reg_c[region] += 1
         for t in tools:
             tool_c[t] += 1
         for p in practices:
@@ -149,6 +172,8 @@ def _build_company(rec: dict, sector_map: dict[str, str]) -> tuple[dict, list[di
         "tools": _counts(tool_c),
         "seniority": _counts(sen_c),
         "locations": _counts(loc_c),
+        "region_mix": _counts(reg_c),              # [[North, n], [South, n], ...]
+        "macro_region": (reg_c.most_common(1)[0][0] if reg_c else ""),
         "fields": fields,
         "news": news,
     }
@@ -169,6 +194,9 @@ def build(out_path: Path | None = None) -> Path:
     # sector x practice demand grid: cell = India roles (across sector companies)
     # whose JD maps to that practice. Rows/cols ranked by total below.
     sector_practice: dict[str, Counter] = defaultdict(Counter)
+    # region -> total roles, and region -> accounts hiring there (with counts)
+    region_roles: Counter = Counter()
+    region_accounts: dict[str, list] = defaultdict(list)
 
     for rec in data:
         company, roles = _build_company(rec, sector_map)
@@ -184,6 +212,13 @@ def build(out_path: Path | None = None) -> Path:
             sector_practice[sec][p] += n
         for city, n in company["locations"]:
             city_roles[city] += n
+        for reg, n in company["region_mix"]:
+            region_roles[reg] += n
+            # status: these are accounts we already track AND that have live India
+            # demand -> "Existing". New / White-space are set once the BD target
+            # list is supplied (we never fabricate relationship status).
+            region_accounts[reg].append({"slug": slug, "name": company["name"],
+                                         "sector": sec, "roles": n, "status": "Existing"})
 
     sectors = [{"name": s, "roles": sector_roles[s],
                 "companies": sorted(sector_companies[s], key=lambda x: -x["roles"])}
@@ -206,6 +241,15 @@ def build(out_path: Path | None = None) -> Path:
                   for pi, p in enumerate(dm_practices)],
     }
 
+    # region_summary: North/West/South/East (then Other), each with its total and
+    # the accounts hiring there, ranked. Feeds the Summary region chart + table.
+    _REGION_ORDER = ["North", "West", "South", "East", "Other"]
+    region_summary = [
+        {"name": r, "roles": region_roles[r],
+         "accounts": sorted(region_accounts[r], key=lambda x: -x["roles"])}
+        for r in _REGION_ORDER if region_roles.get(r)
+    ]
+
     totals = {"companies": len(companies), "roles": sum(c["total"] for c in companies),
               "sectors": len(sectors), "with_roles": sum(1 for c in companies if c["total"])}
 
@@ -215,6 +259,7 @@ def build(out_path: Path | None = None) -> Path:
         "window": 30, "totals": totals, "names": names, "regions": _REGIONS,
         "field_labels": _FIELD_LABELS,
         "sectors": sectors, "practices": practices, "locations": locations,
+        "region_summary": region_summary,
         "demand_matrix": demand_matrix, "tech_radar": tech_radar,
         "companies": companies, "roles_by_company": roles_by_company,
     }

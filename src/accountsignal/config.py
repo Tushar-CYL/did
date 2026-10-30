@@ -48,7 +48,8 @@ class Company:
 
 @dataclass(slots=True)
 class Settings:
-    lookback_days: int = 30
+    lookback_days: int = 30          # hiring window
+    news_lookback_days: int = 120    # news window (4 months)
     request_timeout: int = 30
     eyq_endpoint: str = ""
     eyq_key: str = ""
@@ -89,6 +90,7 @@ def load_companies(path: Path | None = None) -> list[Company]:
 def load_settings() -> Settings:
     return Settings(
         lookback_days=int(os.getenv("ACCOUNTSIGNAL_LOOKBACK_DAYS", "30")),
+        news_lookback_days=int(os.getenv("ACCOUNTSIGNAL_NEWS_LOOKBACK_DAYS", "120")),
         request_timeout=int(os.getenv("ACCOUNTSIGNAL_REQUEST_TIMEOUT", "30")),
         eyq_endpoint=os.getenv("EYQ_INCUBATOR_ENDPOINT", "").rstrip("/"),
         eyq_key=os.getenv("EYQ_INCUBATOR_KEY", ""),

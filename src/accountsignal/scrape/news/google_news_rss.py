@@ -17,13 +17,26 @@ from ...store.schema import NewsItem
 
 log = logging.getLogger("accountsignal.news.gnews")
 
-# category -> OR-group of query terms (GLOBAL market intelligence, last month)
+# category -> OR-group of query terms. Targeted at the signals EY BD cares about:
+# GCC / tech-centre expansion, tech investment, cost cuts, job adds & cuts, tech
+# partnerships/alliances, transformation initiatives and big projects.
 CATEGORY_TERMS: dict[str, str] = {
-    "hiring": "hiring OR recruitment OR headcount OR workforce OR layoffs OR \"new jobs\" OR \"job cuts\"",
-    "vision": "strategy OR leadership OR CEO OR restructuring OR transformation OR \"strategic\" OR reorganisation",
-    "partnerships": "partnership OR alliance OR collaboration OR \"joint venture\" OR deal OR agreement OR vendor",
-    "financial": "earnings OR revenue OR results OR profit OR acquisition OR funding OR quarterly OR guidance",
-    "expansion": "expansion OR \"new facility\" OR investment OR \"capability centre\" OR GCC OR opens OR plant OR factory",
+    # GCC & tech-centre expansion
+    "expansion": "\"global capability centre\" OR \"global capability center\" OR GCC OR \"capability centre\" "
+                 "OR \"technology centre\" OR \"tech centre\" OR \"technology center\" OR \"R&D centre\" "
+                 "OR \"development centre\" OR \"innovation centre\" OR \"new facility\" OR \"new campus\" OR expansion",
+    # transformation initiatives & big projects
+    "vision": "\"digital transformation\" OR transformation OR modernisation OR modernization OR \"big project\" "
+              "OR \"technology roadmap\" OR \"strategic initiative\" OR restructuring OR \"cloud migration\"",
+    # tech partnerships & alliances
+    "partnerships": "\"technology partnership\" OR partnership OR alliance OR collaboration OR \"joint venture\" "
+                    "OR \"tie-up\" OR \"strategic partner\" OR deal",
+    # cost cuts & tech investment
+    "financial": "\"cost cutting\" OR \"cost cut\" OR \"cost reduction\" OR \"technology investment\" OR invests "
+                 "OR investment OR \"capex\" OR funding OR acquisition",
+    # job additions & job cuts
+    "hiring": "\"new jobs\" OR \"job additions\" OR \"adding jobs\" OR hiring OR \"hiring spree\" OR headcount "
+              "OR layoffs OR \"job cuts\" OR \"workforce reduction\"",
 }
 
 _RSS = "https://news.google.com/rss/search?q={q}&hl=en-US&gl=US&ceid=US:en"

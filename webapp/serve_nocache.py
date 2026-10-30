@@ -1,9 +1,14 @@
 """Serve the static export (out/) with no-cache headers so the browser never shows a stale build."""
 import http.server
+import os
 import socketserver
+import sys
 from pathlib import Path
 
-PORT = 3000
+# 3100 by default so this can run at the SAME TIME as "npm run dev" (port 3000).
+#   python webapp/serve_nocache.py          -> 3100
+#   python webapp/serve_nocache.py 8080     -> 8080
+PORT = int(sys.argv[1]) if len(sys.argv) > 1 else int(os.environ.get("ACCOUNTSIGNAL_UI_PORT", 3100))
 ROOT = Path(__file__).resolve().parent / "out"
 
 

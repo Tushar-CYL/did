@@ -8,6 +8,7 @@ export interface Role {
   tools: string[];
   practices: string[];
   city: string;
+  region: string;
   location: string;
   posted_date: string;
   aging_days: number | null;
@@ -44,8 +45,16 @@ export interface Company {
   tools: [string, number][];
   seniority: [string, number][];
   locations: [string, number][];
+  region_mix: [string, number][];
+  macro_region: string;
   fields: Record<string, Field>;
   news: NewsItem[];
+}
+
+export interface RegionSummary {
+  name: string;
+  roles: number;
+  accounts: { slug: string; name: string; sector: string; roles: number; status: string }[];
 }
 
 export interface SectorRow {
@@ -71,6 +80,7 @@ export interface Data {
   sectors: SectorRow[];
   practices: { name: string; roles: number }[];
   locations: { city: string; roles: number }[];
+  region_summary: RegionSummary[];
   demand_matrix: DemandMatrix;
   tech_radar: { practice: string; value: number }[];
   companies: Company[];

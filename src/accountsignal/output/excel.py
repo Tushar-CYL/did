@@ -66,14 +66,14 @@ def build(out_path: Path | None = None) -> Path:
     # 2) Hiring (India) — tools/aging centric, no critical/type/manager
     ws = _sheet(wb, "Hiring_India", [
         "run_date", "company", "sector", "role", "department", "team", "seniority",
-        "skills_tools", "city", "posted_date", "aging_days", "source_url",
+        "skills_tools", "city", "region", "posted_date", "aging_days", "source_url",
     ])
     for c in data:
         for r in c["hiring_india"]:
             ws.append([
                 run_date, c["company"], c.get("sector") or "", r.get("role", ""),
                 r.get("department", ""), r.get("team", ""), r.get("seniority", ""),
-                ", ".join(r.get("tools", [])), r.get("city", ""),
+                ", ".join(r.get("tools", [])), r.get("city", ""), r.get("region", ""),
                 r.get("posted_date", ""), r.get("days_open"), r.get("source_url", ""),
             ])
 

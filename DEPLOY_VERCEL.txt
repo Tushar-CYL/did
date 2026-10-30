@@ -1,0 +1,189 @@
+===============================================================
+ ACCOUNTSIGNAL - DEPLOY TO VERCEL (GitHub -> auto deploy)
+===============================================================
+
+WHAT GETS DEPLOYED
+------------------
+The website is the Next.js app in  webapp\ . Vercel builds it on
+its own server and hosts the finished static site (plain
+HTML/CSS/JS + data.json). No Python, no server, no database runs
+on Vercel.
+
+Everything Vercel needs is already committed in the repo:
+
+    vercel.json                 build recipe (build + output folder)
+    webapp/package.json         the app + its exact pinned versions
+    webapp/package-lock.json    so Vercel installs those same versions
+    webapp/public/data.json     the numbers the live site shows
+    webapp/app, components, lib the pages themselves
+
+The Python scraper (app.py, src\) is NOT deployed - it keeps
+running on the laptop and writes webapp\public\data.json.
+
+
+---------------------------------------------------------------
+ 1. ONE-TIME: PUT THE CODE ON GITHUB
+---------------------------------------------------------------
+From this folder (cmd, PowerShell or Git Bash):
+
+    git add -A
+    git commit -m "Vercel deploy setup"
+    git push origin main
+
+If GitHub asks for a password, paste a Personal Access Token
+(GitHub > Settings > Developer settings > Personal access tokens)
+instead of your account password - GitHub no longer accepts the
+plain password. GitHub Desktop or the VS Code GitHub sign-in also
+work and are easier.
+
+Your .env file is in .gitignore and is NOT uploaded, so the EYQ /
+Apify keys stay on the laptop.
+
+Check: open  https://github.com/Tushar-CYL/did  and confirm you can
+see  vercel.json  and the  webapp  folder in the file list.
+
+
+---------------------------------------------------------------
+ 2. ONE-TIME: CONNECT IT TO VERCEL
+---------------------------------------------------------------
+ 1. Open   https://vercel.com/new
+ 2. Sign in with GitHub (the account that owns the repo).
+ 3. "Import Git Repository" -> choose  Tushar-CYL/did .
+    Not listed? Click "Adjust GitHub App Permissions" and give
+    Vercel access to that repository.
+ 4. On the configure screen leave everything as it is:
+        Project Name          : anything, e.g. ey-account-intel
+        Framework Preset      : Other   (auto-detected)
+        Root Directory        : EMPTY / default  *** IMPORTANT ***
+        Build and Output Settings : leave empty (vercel.json rules)
+        Environment Variables : none
+ 5. Click "Deploy" and wait about 2 minutes.
+
+!!! Do NOT set Root Directory to "webapp". !!!
+The committed vercel.json already builds inside webapp\ and
+publishes webapp\out; changing the root as well makes the paths
+point in the wrong place and the build fails.
+
+You end up with a public link such as
+    https://ey-account-intel.vercel.app
+It is shown on the project page as the "Production" deployment.
+Share that link.
+
+
+---------------------------------------------------------------
+ 3. FROM THEN ON: EVERY PUSH DEPLOYS ITSELF
+---------------------------------------------------------------
+Push a commit to the main branch and Vercel rebuilds + swaps the
+live site in about 2 minutes. No button to press.
+
+    git push origin main    -> production deploy (same URL)
+    a pull request          -> separate preview URL (safe to test)
+
+The monthly refresh is therefore just:
+
+    python app.py                              (refresh the data)
+    git add webapp/public/data.json
+    git commit -m "data refresh"
+    git push origin main
+
+...and the live site shows the new numbers when Vercel finishes.
+Faster: double-click  PUBLISH_SITE.bat  and pick an option; it runs
+the right commands for you.
+
+You do NOT need to run "npm run build" to update the numbers -
+Vercel builds the site itself every time.
+
+
+---------------------------------------------------------------
+ 4. WHAT LIVES WHERE
+---------------------------------------------------------------
+    vercel.json              build recipe Vercel reads   (COMMITTED)
+    webapp                   the site source             (COMMITTED)
+    webapp/public/data.json  what the live site shows    (COMMITTED)
+    webapp/out               the built site - local only, never
+                             committed (Vercel builds its own)
+    app.py, src\, config\    the scraper - never sent to Vercel
+
+Vercel can only see committed files, so a data refresh goes live
+only after data.json is committed and pushed.
+
+
+---------------------------------------------------------------
+ 5. IF SOMETHING GOES WRONG
+---------------------------------------------------------------
+"No framework was detected" / build fails immediately
+    vercel.json is not at the repo root, or Root Directory was
+    changed. Commit vercel.json and keep Root Directory empty.
+
+Build fails with a TypeScript, module or "next build" error
+    Run the same build locally first:
+        cd webapp
+        npm install
+        npm run build
+    Fix what it prints, push again. Vercel runs that same command.
+
+Site builds but shows "Could not load data.json"
+    webapp\public\data.json is missing from the repo. Commit it.
+
+Site works but shows old numbers
+    data.json was not committed. That file is the ONLY thing that
+    updates the numbers:
+        git add webapp/public/data.json
+        git commit -m "data refresh"
+        git push origin main
+
+/deep-dive opens a 404
+    Keep trailingSlash: true in webapp\next.config.js (it is set)
+    and use the URL with the trailing slash:  /deep-dive/
+
+"Cannot find module './NNN.js'" or echarts errors
+    Someone ran "npm audit fix --force" and broke the pinned
+    versions. Restore them:
+        cd webapp
+        git checkout package.json package-lock.json
+        rmdir /s /q node_modules .next .next-dev
+        npm install
+    (DEPLOY_AZURE.txt section A3 explains why.)
+
+Redeploy without changing code
+    Vercel dashboard -> Deployments -> "..." -> Redeploy.
+
+Roll back to an earlier version
+    Vercel dashboard -> Deployments -> pick the old one ->
+    "Promote to Production".
+
+
+---------------------------------------------------------------
+ 6. OPTIONAL - DOMAIN AND ACCESS
+---------------------------------------------------------------
+    Dashboard -> Project -> Settings -> Domains  to attach a
+    domain you own, or just keep the free *.vercel.app address.
+
+    Deployment Protection (Settings -> Deployment Protection) can
+    put a Vercel login in front of the site if it must stay
+    internal. Note that without it the URL is public to anyone who
+    has it - the data.json is not secret, but do not put
+    confidential client data on a public link.
+
+
+---------------------------------------------------------------
+ 7. QUICK REFERENCE
+---------------------------------------------------------------
+Local preview of the EXACT deployed files:
+      cd webapp
+      npm run build
+      python webapp\serve_nocache.py 3100    -> http://localhost:3100
+
+Local dev with live reload:
+      cd webapp
+      npm run dev                            -> http://localhost:3000
+
+What Vercel runs (from vercel.json):
+      npm --prefix webapp ci
+      npm --prefix webapp run build          -> emits webapp\out
+      publish webapp\out as the static site
+
+Full local pipeline that refreshes the data:
+      python app.py
+
+===============================================================

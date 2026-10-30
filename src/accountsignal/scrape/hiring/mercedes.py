@@ -18,14 +18,18 @@ from . import base
 log = logging.getLogger("accountsignal.hiring.mercedes")
 
 _API = "https://jobs.api.mercedes-benz.com/search"
-_PAGE = 10        # API caps the page size at 10
-_MAX_PAGES = 300  # paginate all open postings (~2600) and filter India client-side
+_PAGE = 50        # India-filtered, so a larger page is fine
+_MAX_PAGES = 12   # 233 India postings / 50 ≈ 5 pages; headroom
+_IN_COUNTRY = 390  # Mercedes country code for India
 
 
-def _page(offset: int, http: Http) -> list[dict]:
-    # NOTE: no Sort — the default order surfaces India/GCC postings; a date sort
-    # buries them under high-volume China/Thailand feeds.
-    data = {"LanguageCode": "EN", "SearchParameters": {}, "From": offset, "Size": _PAGE}
+def _page(first: int, http: Http) -> list[dict]:
+    # Query India directly via SearchCriteria (PositionLocation.Country = India).
+    # The old approach paginated the global default feed and missed India roles.
+    data = {"LanguageCode": "EN",
+            "SearchParameters": {"FirstItem": first, "CountItem": _PAGE},
+            "SearchCriteria": [{"CriterionName": "PositionLocation.Country",
+                                "CriterionValue": [_IN_COUNTRY]}]}
     url = f"{_API}?data=" + urllib.parse.quote(json.dumps(data))
     r = http.get(url, headers={"Accept": "application/json"})
     if r is None or r.status_code != 200 or "json" not in r.headers.get("content-type", ""):
@@ -58,12 +62,12 @@ def _jd(url: str, http: Http) -> str:
 def fetch_india_roles(career_url: str, http: Http, lookback_days: int = 30) -> list[Role]:
     roles: list[Role] = []
     seen: set[str] = set()
-    offset = 0
+    first = 1  # Mercedes API is 1-indexed (FirstItem)
     for _ in range(_MAX_PAGES):
-        items = _page(offset, http)
+        items = _page(first, http)
         if not items:
             break
-        offset += len(items)
+        first += len(items)
         for it in items:
             m = it.get("MatchedObjectDescriptor", {})
             jid = str(m.get("PositionID") or m.get("ID") or "")
@@ -87,7 +91,9 @@ def fetch_india_roles(career_url: str, http: Http, lookback_days: int = 30) -> l
             city = ""
             for l in locs:
                 if isinstance(l, dict) and (l.get("CountryCode") == "IN" or "india" in str(l.get("CountryName", "")).lower()):
-                    city = l.get("CityName", "")
+                    # CityName can be a full office address ("Bengaluru, Brigade Tech
+                    # Gardens, ...") — keep only the leading city token.
+                    city = str(l.get("CityName", "")).split(",")[0].strip()
                     break
             if jid:
                 seen.add(jid)
@@ -95,7 +101,8 @@ def fetch_india_roles(career_url: str, http: Http, lookback_days: int = 30) -> l
             roles.append(Role(
                 role=(m.get("PositionTitle") or "").strip(),
                 city=city, country="India",
-                team=m.get("OrganizationName") or "",
+                # OrganizationName here is a postal address, not a team -> drop it.
+                team="",
                 seniority=base.guess_seniority(m.get("PositionTitle", "")),
                 posted_date=str(dp)[:10], days_open=days_open,
                 job_id=str(m.get("PositionID") or m.get("ID") or ""),

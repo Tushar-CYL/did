@@ -1,0 +1,25 @@
+{
+  "routes": [
+    {
+      "route": "/data.json",
+      "headers": {
+        "cache-control": "no-store, no-cache, must-revalidate"
+      }
+    }
+  ],
+  "navigationFallback": {
+    "rewrite": "/404.html",
+    "exclude": [
+      "/_next/*",
+      "/*.{json,css,js,txt,ico,png,jpg,jpeg,svg,webp,woff,woff2}"
+    ]
+  },
+  "mimeTypes": {
+    ".json": "application/json",
+    ".js": "text/javascript",
+    ".css": "text/css"
+  },
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff"
+  }
+}

@@ -1,0 +1,188 @@
+===============================================================
+ ACCOUNTSIGNAL - MONTHLY RUN + AZURE DEPLOY
+===============================================================
+
+-------------------------------------------------
+ A. THE MONTHLY RUN (one command)
+-------------------------------------------------
+From the project folder, with the venv active:
+
+      python app.py
+
+That single command does EVERYTHING:
+
+   1. Hiring scrape   - India roles, LAST 30 DAYS  (per company career portal)
+                        + full JD text -> skills/tools -> practice mapping
+   2. News scrape     - LAST 4 MONTHS (120 days), 5 themes:
+                        GCC & tech centres / Transformation & projects /
+                        Tech partnerships & alliances / Cost & investment /
+                        Jobs: adds & cuts
+   3. Enrich          - department, seniority, city (canonical),
+                        REGION (North/West/South/East), aging, insights
+   4. Excel           - out\AccountSignal_<date>.xlsx   (Power BI ready)
+   5. Dashboard       - out\dashboard\index.html
+   6. Webapp data     - webapp\public\data.json AND webapp\out\data.json
+
+IMPORTANT: step 6 refreshes the DEPLOYED site's data automatically.
+You do NOT need to run "npm run build" every month - only if you change
+the webapp's code/design.
+
+Useful variants:
+      python app.py --eyq                 use the real EYQ LLM for write-ups
+      python app.py --skip-scrape         rebuild reports only (fast)
+      python app.py --companies "GSK,BP"  only these accounts
+      python app.py --no-open             don't open the dashboard at the end
+
+Windows lookback overrides (optional):
+      set ACCOUNTSIGNAL_LOOKBACK_DAYS=30           (hiring window)
+      set ACCOUNTSIGNAL_NEWS_LOOKBACK_DAYS=120     (news window)
+      set ACCOUNTSIGNAL_SCRAPE_DELAY=4             (pause between companies)
+
+If career portals start returning 0 (rate-limiting), RAISE the delay:
+      set ACCOUNTSIGNAL_SCRAPE_DELAY=8
+Do not re-run the full hiring scrape several times in one day.
+
+
+-------------------------------------------------
+ A2. SEEING THE DASHBOARD ON THIS LAPTOP
+-------------------------------------------------
+Double-click    RUN_UI.bat    in the project folder and pick:
+
+   [1] Built site   -> http://localhost:3100   (python, no Node needed)
+   [2] Dev server   -> http://localhost:3000   (npm run dev, live reload)
+   [3] Both at once -> 3100 and 3000 together
+
+They use DIFFERENT ports on purpose, so both can run side by side:
+   3100 = what is actually deployed (webapp\out)
+   3000 = live code preview (webapp\public)
+
+The same thing by hand:
+      python webapp\serve_nocache.py 3100
+      cd webapp  &&  npm run dev
+
+ZIPS
+   ey-intelengence.zip          ~5 MB   code + built site + data. Safe to put
+                                        on GitHub: no .env, no screenshots.
+                                        Run "npm install" once for dev mode.
+   ey-intelengence-offline.zip  ~90 MB  the same PLUS webapp
+ode_modules, so
+                                        "npm run dev" runs with NO internet
+                                        and NO "npm install".
+
+NEITHER ZIP CONTAINS .env - secrets never travel in a zip. On a new machine:
+      copy .env.example .env
+then paste your EYQ_INCUBATOR_KEY and APIFY_TOKEN into it. Without them the
+free scrapers still run; you lose the EYQ write-ups and the Apify fallback
+that rescues the portals the free methods cannot reach.
+
+NOTE ON UNZIPPING: unzip to a SHORT path such as D:\ey-intelengence or
+C:\work. Windows caps paths at 260 characters and node_modules has deep
+folders, so unzipping inside something like
+Users\...\Downloads\c\ can fail halfway.
+
+After "python app.py" refreshes the data, just reload the browser - the
+server sends no-cache headers, so you always see the newest numbers.
+
+
+-------------------------------------------------
+ A3. DO NOT RUN "npm audit fix --force"
+-------------------------------------------------
+It BREAKS this app. It jumps Next 14 -> 16 and swaps echarts-wordcloud for
+the echarts-4 era 1.1.3, and the build then dies with:
+
+   Module not found: Can't resolve
+   'echarts/lib/data/helper/completeDimensions'
+
+Every version in package.json is pinned exactly for this reason, and an
+"overrides" block forces the patched postcss through Next's own copy.
+
+IF SOMEONE ALREADY RAN IT - restore in 4 commands:
+      cd webapp
+      git checkout package.json package-lock.json      (or re-copy both from the zip)
+      rmdir /s /q node_modules .next .next-dev
+      npm install
+
+ABOUT THE WARNINGS npm STILL PRINTS
+  next      - the advisories are DoS bugs in the Next SERVER (image optimizer,
+              RSC request handling). This project is output:'export' - a pile
+              of static files with no Next server at runtime - so they do not
+              apply. Clearing them needs Next 16 + React 19, which breaks the
+              build today.
+  echarts   - XSS via chart content. Every value comes from our own scrape,
+              not from users. Clearing it needs echarts 6, which echarts-
+              wordcloud 2.x does not support.
+Leave them. Run plain "npm install", never "npm audit fix".
+
+
+-------------------------------------------------
+ B. WHAT GETS DEPLOYED
+-------------------------------------------------
+The whole website is the folder:
+
+      webapp\out
+
+It is fully static (plain HTML/CSS/JS + data.json). No server, no backend,
+no Node needed at runtime. It already contains staticwebapp.config.json.
+
+
+-------------------------------------------------
+ C. ONE-TIME: BUILD THE SITE (only if code changed)
+-------------------------------------------------
+      cd webapp
+      npm install
+      npm run build
+      cd ..
+
+This regenerates webapp\out. Skip it for a normal monthly data refresh.
+
+To preview while editing the UI instead:
+      cd webapp
+      npm run dev            (http://localhost:3000)
+
+"npm run dev" and "npm run build" now use SEPARATE folders (.next-dev vs
+.next), so they can't corrupt each other. Don't run both at the same time.
+If a build or dev run ever breaks with "Cannot find module './NNN.js'":
+      npm run clean
+      npm run build
+
+
+-------------------------------------------------
+ D. DEPLOY TO AZURE STATIC WEB APPS
+-------------------------------------------------
+Option 1 - SWA CLI (recommended, repeatable)
+
+   1. Install once (needs Node):
+          npm install -g @azure/static-web-apps-cli
+
+   2. In the Azure Portal, create a Static Web App
+      (Plan: Free, Deployment source: "Other").
+      Copy its DEPLOYMENT TOKEN.
+
+   3. Deploy (run from the project folder):
+          swa deploy .\webapp\out --deployment-token <YOUR_TOKEN> --env production
+
+   4. Azure prints the public URL. Share that link.
+
+   Every month after "python app.py", just re-run step 3 to publish the
+   refreshed data.
+
+Option 2 - VS Code extension
+   Install "Azure Static Web Apps" extension -> sign in ->
+   "Create Static Web App (Advanced)" -> choose the webapp\out folder.
+
+Option 3 - Portal drag & drop (quick look)
+   Zip the CONTENTS of webapp\out (so index.html is at the zip root) and
+   upload. Make sure the zip uses forward-slash paths - create it with:
+          python tools\make_site_zip.py
+   (that script writes AccountSignal_site_deploy.zip next to the project)
+
+
+-------------------------------------------------
+ E. MONTHLY CHECKLIST
+-------------------------------------------------
+   [ ] python app.py
+   [ ] check the console summary (accounts / roles / news counts)
+   [ ] swa deploy .\webapp\out --deployment-token <TOKEN> --env production
+   [ ] open the Azure URL and hard-refresh (Ctrl+Shift+R)
+
+===============================================================
