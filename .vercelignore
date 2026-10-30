@@ -1,0 +1,14 @@
+# Only used if you deploy with the Vercel CLI from this folder (git-connected
+# deployments upload the repo, not this). Keep laptop-only stuff out of the upload.
+.venv/
+data/
+out/
+immage/
+webapp/out/
+webapp/node_modules/
+webapp/.next/
+webapp/.next-dev/
+.env
+*.zip
+*.png.tmp
+__pycache__/
